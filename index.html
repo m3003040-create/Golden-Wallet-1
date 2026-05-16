@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#0D0D0D">
+  <meta name="description" content="GoldenWallet - Premium P2P Crypto Wallet">
+  <title>GoldenWallet | P2P Crypto</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- Font Awesome 6 Free -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app-root">
+    <!-- ========== GLOBAL NOTIFICATION TOAST CONTAINER ========== -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- ========== AUTH VIEW ========== -->
+    <section id="auth-view" class="view active">
+      <div class="auth-wrapper">
+        <!-- Logo / Brand -->
+        <div class="auth-brand">
+          <div class="brand-icon"><i class="fa-solid fa-crown"></i></div>
+          <h1 class="brand-name">Golden<span>Wallet</span></h1>
+          <p class="brand-tagline">Private. Secure. Peer-to-Peer.</p>
+        </div>
+        
+        <!-- Auth Step Container -->
+        <div class="auth-step-container">
+          <!-- Step 0: Entry Options -->
+          <div id="auth-step-entry" class="auth-step active">
+            <button id="auth-create-btn" class="btn-primary btn-luxury">
+              <i class="fa-solid fa-plus-circle"></i> Create New GoldenWallet
+            </button>
+            <button id="auth-import-btn" class="btn-secondary btn-luxury">
+              <i class="fa-solid fa-download"></i> Import Existing Phrase
+            </button>
+          </div>
+          
+          <!-- Step 1: Create Wallet - Seed Phrase Generation & Verify -->
+          <div id="auth-step-create" class="auth-step">
+            <div class="step-header">
+              <h2>Your Recovery Phrase</h2>
+              <p class="step-description">Write down these 12 words in the exact order. Keep them safe.</p>
+            </div>
+            <div id="seed-phrase-container" class="seed-grid">
+              <!-- Dynamically filled by auth.js -->
+            </div>
+            <div class="step-actions">
+              <button id="seed-copy-btn" class="btn-icon-only"><i class="fa-solid fa-copy"></i></button>
+              <button id="seed-verify-btn" class="btn-primary btn-luxury">I've Written Them Down – Verify</button>
+            </div>
+          </div>
+
+          <!-- Step 2: Import Wallet - 12-word phrase input -->
+          <div id="auth-step-import" class="auth-step">
+            <div class="step-header">
+              <h2>Import Existing Wallet</h2>
+              <p class="step-description">Enter your 12-word recovery phrase separated by spaces.</p>
+            </div>
+            <div class="import-input-wrapper">
+              <textarea id="import-phrase-input" placeholder="word1 word2 word3 ... word12" rows="3" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+              <div id="import-word-chips" class="word-chips-preview">
+                <!-- dynamically shows recognized words -->
+              </div>
+            </div>
+            <button id="import-confirm-btn" class="btn-primary btn-luxury" disabled>Confirm & Proceed</button>
+          </div>
+
+          <!-- Step 3: PIN Setup (after seed verified/imported) -->
+          <div id="auth-step-pin" class="auth-step">
+            <div class="step-header">
+              <h2>Set Local PIN</h2>
+              <p class="step-description">Create a 4‑digit PIN to encrypt your session locally.</p>
+            </div>
+            <div id="pin-display" class="pin-dots">
+              <span class="pin-dot" data-index="0"></span>
+              <span class="pin-dot" data-index="1"></span>
+              <span class="pin-dot" data-index="2"></span>
+              <span class="pin-dot" data-index="3"></span>
+            </div>
+            <div id="pin-pad" class="pin-pad-grid">
+              <button class="pin-key" data-key="1">1</button>
+              <button class="pin-key" data-key="2">2</button>
+              <button class="pin-key" data-key="3">3</button>
+              <button class="pin-key" data-key="4">4</button>
+              <button class="pin-key" data-key="5">5</button>
+              <button class="pin-key" data-key="6">6</button>
+              <button class="pin-key" data-key="7">7</button>
+              <button class="pin-key" data-key="8">8</button>
+              <button class="pin-key" data-key="9">9</button>
+              <button class="pin-key pin-delete" data-key="delete"><i class="fa-solid fa-delete-left"></i></button>
+              <button class="pin-key" data-key="0">0</button>
+              <button class="pin-key pin-confirm" data-key="confirm"><i class="fa-solid fa-check"></i></button>
+            </div>
+            <p id="pin-error" class="error-message hidden"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== DASHBOARD VIEW ========== -->
+    <section id="dashboard-view" class="view">
+      <header class="dashboard-header">
+        <div class="header-left">
+          <div class="brand-mini"><i class="fa-solid fa-crown"></i> GoldenWallet</div>
+        </div>
+        <div class="header-right">
+          <button id="eye-toggle" class="btn-icon-only" aria-label="Toggle balance visibility">
+            <i class="fa-solid fa-eye"></i>
+          </button>
+          <button id="p2p-open-modal-btn" class="btn-icon-only" aria-label="Peer Connection">
+            <i class="fa-solid fa-people-arrows"></i>
+          </button>
+          <button id="settings-btn" class="btn-icon-only" aria-label="Settings">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+        </div>
+      </header>
+
+      <main class="dashboard-main">
+        <!-- Balance Card -->
+        <div class="card balance-card">
+          <div class="card-label">Total Balance</div>
+          <div class="balance-amount" id="balance-display">12,450.00 GWALLET</div>
+          <div class="balance-masked hidden" id="balance-masked">•••••••••</div>
+          <div class="card-actions">
+            <button id="deposit-btn" class="btn-primary btn-luxury"><i class="fa-solid fa-arrow-down"></i> Deposit</button>
+            <button id="transfer-toggle-btn" class="btn-secondary btn-luxury" disabled><i class="fa-solid fa-paper-plane"></i> Transfer</button>
+          </div>
+        </div>
+
+        <!-- Connection Status Badge -->
+        <div class="status-badge" id="connection-status-badge">
+          <span class="status-dot offline"></span>
+          <span id="connection-status-text">Offline</span>
+        </div>
+
+        <!-- Transfer Widget (shown when connected) -->
+        <div id="transfer-widget" class="card transfer-card hidden">
+          <h3>Instant P2P Transfer</h3>
+          <div class="input-group floating-label">
+            <input type="number" id="transfer-amount" placeholder="0.00" min="0.01" step="0.01" required>
+            <label for="transfer-amount">Amount (GWALLET)</label>
+          </div>
+          <button id="execute-transfer-btn" class="btn-primary btn-luxury full-width">
+            <i class="fa-solid fa-bolt"></i> Execute Transfer
+          </button>
+          <p id="transfer-error" class="error-message hidden"></p>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card transaction-card">
+          <h3>Recent Activity</h3>
+          <div id="transaction-list" class="transaction-list">
+            <!-- Dynamically populated -->
+          </div>
+          <div class="empty-state" id="transaction-empty">No transactions yet.</div>
+        </div>
+      </main>
+
+      <footer class="dashboard-footer">
+        <p>GoldenWallet · Peer-to-Peer · <span id="session-indicator">Session Active</span></p>
+      </footer>
+    </section>
+
+    <!-- ========== P2P CONNECTION MODAL VIEW ========== -->
+    <div id="p2p-modal-view" class="modal-overlay hidden">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h2>P2P Direct Connection</h2>
+          <button class="modal-close-btn" id="p2p-modal-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <!-- Step progress indicator -->
+          <div class="p2p-stepper">
+            <div class="step-marker active" data-step="offer">1. Create Offer</div>
+            <div class="step-marker" data-step="answer">2. Exchange Answer</div>
+            <div class="step-marker" data-step="complete">3. Establish</div>
+          </div>
+
+          <!-- Step 1: Creator generates offer -->
+          <div id="p2p-step-offer" class="p2p-step active">
+            <p>As the connection initiator, generate an offer and share it with your peer.</p>
+            <button id="initiate-connection-btn" class="btn-primary btn-luxury full-width">
+              <i class="fa-solid fa-broadcast-tower"></i> Generate Offer
+            </button>
+            <div class="output-field">
+              <label for="offer-textarea">Your Offer (Base64 encoded)</label>
+              <textarea id="offer-textarea" readonly rows="4" placeholder="Offer will appear here..."></textarea>
+              <button id="copy-offer-btn" class="btn-icon-only copy-btn"><i class="fa-solid fa-copy"></i></button>
+            </div>
+            <div id="ice-gathering-status-offer" class="ice-status">
+              <span class="ice-label">ICE Candidates:</span>
+              <ul id="offer-ice-list"></ul>
+            </div>
+          </div>
+
+          <!-- Step 2: Joiner processes offer and generates answer -->
+          <div id="p2p-step-answer" class="p2p-step">
+            <p>If you received an offer, paste it below and generate your answer.</p>
+            <div class="input-field">
+              <label for="offer-input">Received Offer (Base64)</label>
+              <textarea id="offer-input" placeholder="Paste the offer string here..." rows="4"></textarea>
+            </div>
+            <button id="generate-answer-btn" class="btn-primary btn-luxury full-width">
+              <i class="fa-solid fa-reply"></i> Process Offer & Generate Answer
+            </button>
+            <div class="output-field">
+              <label for="answer-textarea">Your Answer (Base64 encoded)</label>
+              <textarea id="answer-textarea" readonly rows="4" placeholder="Answer will appear here..."></textarea>
+              <button id="copy-answer-btn" class="btn-icon-only copy-btn"><i class="fa-solid fa-copy"></i></button>
+            </div>
+            <div id="ice-gathering-status-answer" class="ice-status">
+              <span class="ice-label">ICE Candidates:</span>
+              <ul id="answer-ice-list"></ul>
+            </div>
+          </div>
+
+          <!-- Step 3: Final handshake – Creator pastes answer -->
+          <div id="p2p-step-complete" class="p2p-step">
+            <p>Paste the answer from your peer to finalize the connection.</p>
+            <div class="input-field">
+              <label for="final-answer-input">Peer's Answer (Base64)</label>
+              <textarea id="final-answer-input" placeholder="Paste the answer string here..." rows="4"></textarea>
+            </div>
+            <button id="establish-btn" class="btn-primary btn-luxury full-width">
+              <i class="fa-solid fa-link"></i> Establish Direct Link
+            </button>
+            <div id="connection-feedback" class="feedback-message hidden"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== DEPOSIT MODAL VIEW (Simulated Drawer) ========== -->
+    <div id="deposit-modal-view" class="modal-overlay hidden">
+      <div class="modal-container deposit-drawer">
+        <div class="modal-header">
+          <h2>Quick Deposit</h2>
+          <button class="modal-close-btn" id="deposit-modal-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+          <!-- Network selection pill tabs -->
+          <div class="network-tabs">
+            <button class="network-tab active" data-network="ton">
+              <i class="fa-solid fa-diamond"></i> TON
+            </button>
+            <button class="network-tab" data-network="bsc">
+              <i class="fa-brands fa-btc"></i> BSC
+            </button>
+          </div>
+          <!-- QR Code display zone -->
+          <div class="qr-container">
+            <canvas id="deposit-qr-canvas" width="200" height="200"></canvas>
+            <p id="deposit-address-display" class="deposit-address">Loading address...</p>
+            <button id="copy-deposit-address-btn" class="btn-secondary btn-small"><i class="fa-solid fa-copy"></i> Copy</button>
+          </div>
+          <!-- Watcher simulation status -->
+          <div class="watcher-status" id="watcher-status">
+            <span class="pulse-dot"></span>
+            <span id="watcher-text">Listening for incoming transaction...</span>
+          </div>
+          <div id="deposit-notification-area" class="notification-inline"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== GLOBAL LOADING / SKELETON OVERLAY (can be used by JS) ========== -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="spinner"></div>
+    </div>
+
+    <!-- ========== TRANSACTION SUCCESS ANIMATION CONTAINER ========== -->
+    <div id="coin-animation-container" class="coin-animation-container"></div>
+  </div>
+
+  <!-- ========== SCRIPTS ========== -->
+  <script src="auth.js"></script>
+  <script src="p2p.js"></script>
+  <script src="wallet.js"></script>
+</body>
+</html>
